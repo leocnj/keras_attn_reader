@@ -40,12 +40,8 @@ def ArgumentParser():
                         help='learning rate')
     parser.add_argument('--decay_rate', type=float, default=0.0,
                         help='decay rate for rmsprop')
-    parser.add_argument('--lstm_hs', type=int, default=128,
-                        help='LSTM hidden states')
-    parser.add_argument('--run_mode', type=str, default='run', help='run_mode: run vs. paramtweak')
-    # for param_tweak
-    parser.add_argument('--filter_size', type=int, default='5', help='size of CNN filters')
-    parser.add_argument('--filter_num',  type=int, default='100', help='num of CNN filters')
+    parser.add_argument('--tweak_max', type=int, default=100,
+                        help='hyperopt tweak max')
 
     # parser.add_argument('--device', type=str, default='/cpu:0',
     #                     help='Computing device to use for training. \

@@ -10,6 +10,8 @@ from keras.callbacks import EarlyStopping
 from reader.filereader import read_glove_vectors
 from reader.csvreader import read_input_csv
 
+from model.model_tweak import model_selector
+
 from hyperopt import fmin, hp, Trials, STATUS_OK, tpe
 from utils import argumentparser
 import csv
@@ -51,72 +53,27 @@ def _gen_embd_matrix(args, word_index):
 
 def model(params):
     '''
-    Model providing function:
+    Defined a model for hyperopt to tweak hyper paramters
+    Call _kim_cnn_model to define CNN
+    Pass several global variables, x_, y_, args, nb_classses, and embedding_matrix
 
-    Create Keras CNN model
-
-    :param x_train:
-    :param y_train:
-    :param x_test:
-    :param y_test:
+    :param params: dict defining HP ranges
     :return:
     '''
-    global  args  # using GV to obtain other params.
-    global  nb_classes
-    nb_filter = params['nb_filter']
-    use_embeddings = params['use_embeddings']
-    embeddings_trainable = params['embeddings_trainable']
 
-    input = Input(shape=(args.max_sequence_len,), dtype='int32', name="input")
-    if (use_embeddings):
-        embedding_layer = Embedding(args.nb_words + 1,
-                                    args.embedding_dim,
-                                    weights=[embedding_matrix],
-                                    input_length=args.max_sequence_len,
-                                    trainable=embeddings_trainable)(input)
-    else:
-        embedding_layer = Embedding(args.nb_words + 1,
-                                    args.mbedding_dim,
-                                    weights=None,
-                                    input_length=args.max_sequence_len,
-                                    trainable=embeddings_trainable)(input)
-    embedding_layer = Dropout(params['dropout1'])(embedding_layer)
-
-    filtersize = params['filter_size']
-    filtersize_list = [filtersize - 1, filtersize, filtersize + 1]
-    conv_list = []
-    for index, filtersize in enumerate(filtersize_list):
-        pool_length = args.max_sequence_len - filtersize + 1
-        conv = Conv1D(nb_filter=nb_filter, filter_length=filtersize, activation='relu')(embedding_layer)
-        pool = MaxPooling1D(pool_length=pool_length)(conv)
-        flatten = Flatten()(pool)
-        conv_list.append(flatten)
-
-    if (len(filtersize_list) > 1):
-        conv_out = Merge(mode='concat', concat_axis=1)(conv_list)
-    else:
-        conv_out = conv_list[0]
-
-    dp_out = Dropout(params['dropout2'])(conv_out)
-    result = Dense(nb_classes, activation='softmax')(dp_out)
-
-    model = Model(input=input, output=result)
-    model.compile(loss='categorical_crossentropy',
-                  optimizer=params['optimizer'],
-                  metrics=['acc'])
-    print(model.summary())
+    _model = model_selector(params, args, nb_classes, embedding_matrix)
 
     earlystop = EarlyStopping(monitor='val_loss', patience=2, verbose=1)
     callbacks_list = [earlystop]
 
-    model.fit(x_train, y_train,
+    _model.fit(x_train, y_train,
               batch_size=params['batch_size'],
               nb_epoch=args.num_epochs,
               verbose=1,
               validation_split=0.1,
               callbacks=callbacks_list)
 
-    score, acc = model.evaluate(x_test, y_test, verbose=1)
+    score, acc = _model.evaluate(x_test, y_test, verbose=1)
     print('test acc:', acc)
     return {'loss': -acc, 'status': STATUS_OK, 'model': model}
 
@@ -148,9 +105,10 @@ if __name__ == '__main__':
                  'dropout1': hp.uniform('dropout1', 0.25, 0.75),
                  'dropout2': hp.uniform('dropout2', 0.25, 0.75),
                  'use_embeddings': True,
-                 'embeddings_trainable': False}
+                 'embeddings_trainable': False,
+                 'lstm_hs': hp.choice('lstm_hs', [32, 50, 64])}
         trials = Trials()
-        best = fmin(model, space, algo=tpe.suggest, max_evals=100, trials=trials)
+        best = fmin(model, space, algo=tpe.suggest, max_evals=args.tweak_max, trials=trials)
         print(best)
         trials2csv(trials, 'pun_hp.csv')
     elif(args.dataset == 'ted'):
@@ -164,7 +122,7 @@ if __name__ == '__main__':
                  'use_embeddings': True,
                  'embeddings_trainable': False}
         trials = Trials()
-        best = fmin(model, space, algo=tpe.suggest, max_evals=200, trials=trials)
+        best = fmin(model, space, algo=tpe.suggest, max_evals=args.tweak_max, trials=trials)
         print(best)
         trials2csv(trials, 'ted_hp.csv')
     else:
