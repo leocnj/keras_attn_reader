@@ -1,10 +1,6 @@
 from __future__ import print_function
 
 import numpy as np
-from keras.layers import Conv1D, MaxPooling1D, Embedding
-from keras.layers import Dense, Flatten, Dropout
-from keras.models import Model
-from keras.engine import Input, Merge
 from keras.callbacks import EarlyStopping
 
 from reader.filereader import read_glove_vectors
