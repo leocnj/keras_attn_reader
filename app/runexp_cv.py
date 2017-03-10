@@ -24,15 +24,15 @@ def asap(args):
     pairs = zip(trains, tests)
 
     # Using params found from tweak_params.py
-    params = {'optimizer': 'rmsprop',
+    params = {'optimizer': 'adam',
              'batch_size': 32,
              'filter_size': 3,
              'nb_filter': 100,
-             'dropout1': 0.2683,
-             'dropout2': 0.4900,
+             'dropout1': 0.35,
+             'dropout2': 0.45,
              'use_embeddings': True,
              'embeddings_trainable': False,
-              'lstm_hs': 32}
+              'lstm_hs': 48}
 
     accs, kps, wts, acts, preds = train_cv(args, params, pairs)
     cv_kappa = metrics.mean_quadratic_weighted_kappa(kps)
@@ -169,7 +169,7 @@ def train_cv(args, params, pairs):
 
         acc = accuracy(y_pred, y_act)
         print('test accuracy: {}'.format(acc))
-        kp_v = metrics.kappa(y_pred, y_act)
+        kp_v = metrics.quadratic_weighted_kappa(y_pred, y_act)
         kps.append(kp_v)
         accs.append(acc)
         wts.append(y_pred.shape[0])

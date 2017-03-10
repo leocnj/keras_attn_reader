@@ -24,8 +24,8 @@ def pun(args):
 
     :return:
     '''
-    train = args.data_dir + '/val_train.csv'
-    test = args.data_dir + '/validation.csv'
+    train = args.data_dir + '/dev_ta.csv'
+    test = args.data_dir + '/dev_ts.csv'
     x_train, y_train, x_test, y_test, word_index, nb_classes = read_input_csv(train,
                                                                               test,
                                                                               args.nb_words,
@@ -121,5 +121,20 @@ if __name__ == '__main__':
         best = fmin(model, space, algo=tpe.suggest, max_evals=args.tweak_max, trials=trials)
         print(best)
         trials2csv(trials, 'ted_hp.csv')
+    elif(args.dataset == 'asap'):
+        x_train, y_train, x_test, y_test, embedding_matrix, nb_classes = pun(args)
+        space = {'optimizer': hp.choice('optimizer', ['adadelta', 'rmsprop', 'adam']),
+                 'batch_size': 32,
+                 'filter_size': hp.choice('filter_size', [3, 4, 5]),
+                 'nb_filter': hp.choice('nb_filter', [50, 75, 100, 125]),
+                 'dropout1': hp.choice('dropout1', [0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75]),
+                 'dropout2': hp.choice('dropout2', [0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75]),
+                 'use_embeddings': True,
+                 'embeddings_trainable': False,
+                 'lstm_hs': hp.choice('lstm_hs', [32, 48, 64])}
+        trials = Trials()
+        best = fmin(model, space, algo=tpe.suggest, max_evals=args.tweak_max, trials=trials)
+        print(best)
+        trials2csv(trials, 'asap_hp.csv')
     else:
         print('wrong dataset')
