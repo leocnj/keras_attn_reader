@@ -81,7 +81,8 @@ def _lstm_model(params, args, nb_classes, embedding_matrix):
 
     input = Input(shape=(args.max_sequence_len,), dtype='int32', name="input")
     aux = Input(shape=(1,), dtype='float32', name="aux")
-    # len_feat = Dense(1, activation='softmax')(aux)
+    len_feat = Dense(1, activation='softmax')(aux)
+
     if (use_embeddings):
         embedding_layer = Embedding(args.nb_words + 1,
                                     args.embedding_dim,
@@ -96,11 +97,15 @@ def _lstm_model(params, args, nb_classes, embedding_matrix):
                                     trainable=embeddings_trainable)(input)
 
     x = Dropout(params['dropout1'])(embedding_layer)
-    x = Bidirectional(LSTM(lstm_hs, dropout_W=0.2, dropout_U=0.2, return_sequences=True))(x)
-    x = Bidirectional(LSTM(lstm_hs, dropout_W=0.2, dropout_U=0.2))(x)
+    # based on two_LSTM, setup network.
+    if(params['two_LSTM']):
+        x = Bidirectional(LSTM(lstm_hs, dropout_W=0.2, dropout_U=0.2, return_sequences=True))(x)
+        x = Bidirectional(LSTM(lstm_hs, dropout_W=0.2, dropout_U=0.2))(x)
+    else:
+        x = Bidirectional(LSTM(lstm_hs, dropout_W=0.2, dropout_U=0.2))(x)
     x = Dropout(params['dropout2'])(x)
 
-    x = merge([x, aux], mode='concat')
+    x = merge([x, len_feat], mode='concat')
     result = Dense(nb_classes, activation='softmax')(x)
     model = Model(input=[input, aux], output=result)
     model.compile(loss='categorical_crossentropy',

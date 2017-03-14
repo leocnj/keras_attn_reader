@@ -16,8 +16,6 @@ import csv
 np.random.seed(42)
 
 
-
-
 def pun(args):
     '''
     Data providing function:
@@ -26,13 +24,14 @@ def pun(args):
     '''
     train = args.data_dir + '/dev_ta.csv'
     test = args.data_dir + '/dev_ts.csv'
-    x_train, y_train, x_test, y_test, word_index, nb_classes = read_input_csv(train,
-                                                                              test,
-                                                                              args.nb_words,
-                                                                              args.max_sequence_len)
+    x_train, y_train, x_test, y_test, word_index, nb_classes, train_len, test_len = read_input_csv(train,
+                                                                                                   test,
+                                                                                                   args.nb_words,
+                                                                                                   args.max_sequence_len)
+
     embedding_matrix = _gen_embd_matrix(args, word_index)
 
-    return x_train, y_train, x_test, y_test, embedding_matrix, nb_classes
+    return x_train, y_train, x_test, y_test, embedding_matrix, nb_classes, train_len, test_len
 
 
 def _gen_embd_matrix(args, word_index):
@@ -62,14 +61,14 @@ def model(params):
     earlystop = EarlyStopping(monitor='val_loss', patience=2, verbose=1)
     callbacks_list = [earlystop]
 
-    _model.fit(x_train, y_train,
+    _model.fit([x_train, train_len], y_train,
               batch_size=params['batch_size'],
               nb_epoch=args.num_epochs,
               verbose=1,
               validation_split=0.1,
               callbacks=callbacks_list)
 
-    score, acc = _model.evaluate(x_test, y_test, verbose=1)
+    score, acc = _model.evaluate([x_test, test_len], y_test, verbose=1)
     print('test acc:', acc)
     return {'loss': -acc, 'status': STATUS_OK, 'model': model}
 
@@ -122,11 +121,10 @@ if __name__ == '__main__':
         print(best)
         trials2csv(trials, 'ted_hp.csv')
     elif(args.dataset == 'asap'):
-        x_train, y_train, x_test, y_test, embedding_matrix, nb_classes = pun(args)
+        x_train, y_train, x_test, y_test, embedding_matrix, nb_classes, train_len, test_len = pun(args)
         space = {'optimizer': hp.choice('optimizer', ['adadelta', 'rmsprop', 'adam']),
-                 'batch_size': 32,
-                 'filter_size': hp.choice('filter_size', [3, 4, 5]),
-                 'nb_filter': hp.choice('nb_filter', [50, 75, 100, 125]),
+                 'batch_size': args.batch_size,
+                 'two_LSTM': hp.choice('two_LSTM', [0, 1]),
                  'dropout1': hp.choice('dropout1', [0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75]),
                  'dropout2': hp.choice('dropout2', [0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75]),
                  'use_embeddings': True,
