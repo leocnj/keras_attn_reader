@@ -42,6 +42,8 @@ def ArgumentParser():
                         help='decay rate for rmsprop')
     parser.add_argument('--tweak_max', type=int, default=100,
                         help='hyperopt tweak max')
+    parser.add_argument('--tweak_id', type=int, default=1,
+                        help='hyperopt tweak item id')
 
     # parser.add_argument('--device', type=str, default='/cpu:0',
     #                     help='Computing device to use for training. \

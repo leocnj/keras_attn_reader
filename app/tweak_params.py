@@ -22,8 +22,9 @@ def pun(args):
 
     :return:
     '''
-    train = args.data_dir + '/dev_ta.csv'
-    test = args.data_dir + '/dev_ts.csv'
+    id = str(args.tweak_id)
+    train = args.data_dir + 'dev_train' + id + '.csv'
+    test = args.data_dir + 'dev_test' + id + '.csv'
     x_train, y_train, x_test, y_test, word_index, nb_classes, train_len, test_len = read_input_csv(train,
                                                                                                    test,
                                                                                                    args.nb_words,
@@ -91,6 +92,7 @@ def trials2csv(trials, csvfile):
 if __name__ == '__main__':
 
     args = argumentparser.ArgumentParser()
+
     if (args.dataset == 'pun'):
         x_train, y_train, x_test, y_test, embedding_matrix, nb_classes = pun(args)
         space = {'optimizer': hp.choice('optimizer', ['adadelta', 'rmsprop']),
@@ -133,6 +135,7 @@ if __name__ == '__main__':
         trials = Trials()
         best = fmin(model, space, algo=tpe.suggest, max_evals=args.tweak_max, trials=trials)
         print(best)
-        trials2csv(trials, 'asap_hp.csv')
+        hp_out = 'asap_' + str(args.tweak_id) + '.csv'
+        trials2csv(trials, hp_out)
     else:
         print('wrong dataset')
