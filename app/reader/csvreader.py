@@ -53,7 +53,10 @@ def read_input_csv(train_csv, test_csv, nb_words, maxlen):
     train_X = pad_sequences(textseq[0:n_ta], maxlen,  padding='post', truncating='post')
     test_X = pad_sequences(textseq[n_ta:], maxlen,  padding='post', truncating='post')
 
-    return train_X, train_Y, test_X, test_Y, word_index, nb_classes
+    train_len = np.asarray(lens[0:n_ta], dtype='float32')
+    test_len = np.asarray(lens[n_ta:], dtype='float32')
+
+    return train_X, train_Y, test_X, test_Y, word_index, nb_classes, train_len, test_len
 
 
 def test_pun2():

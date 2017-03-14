@@ -108,7 +108,7 @@ def argu(args):
     print('10 fold CV accuracy: {}'.format(acc_cv))
 
 
-def run_a_model(args, params, embedding_matrix, x_train, y_train, x_test, y_test):
+def run_a_model(args, params, embedding_matrix, x_train, y_train, x_test, y_test, train_len, test_len):
     '''
     :return:
     '''
@@ -118,13 +118,13 @@ def run_a_model(args, params, embedding_matrix, x_train, y_train, x_test, y_test
     earlystop = EarlyStopping(monitor='val_loss', patience=2, verbose=1)
     callbacks_list = [earlystop]
 
-    model.fit(x_train, y_train,
+    model.fit([x_train, train_len], y_train,
               batch_size=params['batch_size'],
               nb_epoch=args.num_epochs,
               verbose=1,
               validation_split=0.1,
               callbacks=callbacks_list)
-    y_proba = earlystop.model.predict(x_test, batch_size=args.batch_size)
+    y_proba = earlystop.model.predict([x_test, test_len], batch_size=args.batch_size)
     # http://bit.ly/2hFvAjS
     y_act = probas_to_classes(y_test)
     y_pred = probas_to_classes(y_proba)
@@ -145,7 +145,7 @@ def train_cv(args, params, pairs):
     preds = np.zeros(0) 
     for(train, test) in pairs:
         print(train + '=>' + test + '...')
-        x_train, y_train, x_test, y_test, word_index, nb_classes = read_input_csv(train,
+        x_train, y_train, x_test, y_test, word_index, nb_classes, train_len, test_len = read_input_csv(train,
                                                                                   test,
                                                                                   args.nb_words,
                                                                                   args.max_sequence_len)
@@ -165,7 +165,8 @@ def train_cv(args, params, pairs):
         args.nb_words = nb_words
         args.len_labels_index = nb_classes
 
-        y_pred, y_act = run_a_model(args, params, embedding_matrix, x_train, y_train, x_test, y_test)
+        y_pred, y_act = run_a_model(args, params, embedding_matrix, x_train, y_train, x_test, y_test,
+                                    train_len, test_len)
 
         acc = accuracy(y_pred, y_act)
         print('test accuracy: {}'.format(acc))

@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.layers import Dense, Flatten, Dropout,  LSTM, Bidirectional
+from keras.layers import merge
 from keras.models import Model
 from keras.engine import Input, Merge
 from att_layer import AttLayer
@@ -79,6 +80,8 @@ def _lstm_model(params, args, nb_classes, embedding_matrix):
     embeddings_trainable = params['embeddings_trainable']
 
     input = Input(shape=(args.max_sequence_len,), dtype='int32', name="input")
+    aux = Input(shape=(1,), dtype='float32', name="aux")
+    # len_feat = Dense(1, activation='softmax')(aux)
     if (use_embeddings):
         embedding_layer = Embedding(args.nb_words + 1,
                                     args.embedding_dim,
@@ -93,10 +96,13 @@ def _lstm_model(params, args, nb_classes, embedding_matrix):
                                     trainable=embeddings_trainable)(input)
 
     x = Dropout(params['dropout1'])(embedding_layer)
+    x = Bidirectional(LSTM(lstm_hs, dropout_W=0.2, dropout_U=0.2, return_sequences=True))(x)
     x = Bidirectional(LSTM(lstm_hs, dropout_W=0.2, dropout_U=0.2))(x)
     x = Dropout(params['dropout2'])(x)
+
+    x = merge([x, aux], mode='concat')
     result = Dense(nb_classes, activation='softmax')(x)
-    model = Model(input=input, output=result)
+    model = Model(input=[input, aux], output=result)
     model.compile(loss='categorical_crossentropy',
                   optimizer=params['optimizer'],
                   metrics=['acc'])
