@@ -23,16 +23,101 @@ def asap(args):
     tests = [args.data_dir + 'test' + str(fold) + '.csv' for fold in folds]
     pairs = zip(trains, tests)
 
+    dpw = [0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75]
+
     # Using params found from tweak_params.py
-    params = {'optimizer': 'adam',
+    params = {
+        1:
+            {'optimizer': 'adam',
              'batch_size': 32,
-             'filter_size': 3,
-             'nb_filter': 100,
-             'dropout1': 0.35,
-             'dropout2': 0.45,
+             'dropout1': dpw[0],
+             'dropout2': dpw[3],
              'use_embeddings': True,
              'embeddings_trainable': False,
-              'lstm_hs': 48}
+             'lstm_hs': 64,
+             'two_LSTM': 1},
+        2:
+            {'optimizer': 'adam',
+             'batch_size': 32,
+             'dropout1': dpw[3],
+             'dropout2': dpw[6],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 32,
+             'two_LSTM': 1},
+        3:
+            {'optimizer': 'adam',
+             'batch_size': 32,
+             'dropout1': dpw[0],
+             'dropout2': dpw[8],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 48,
+             'two_LSTM': 0},
+        4:
+            {'optimizer': 'adadelta',
+             'batch_size': 32,
+             'dropout1': dpw[6],
+             'dropout2': dpw[8],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 64,
+             'two_LSTM': 1},
+        5:
+            {'optimizer': 'adam',
+             'batch_size': 32,
+             'dropout1': dpw[4],
+             'dropout2': dpw[3],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 48,
+             'two_LSTM': 1},
+        6:
+            {'optimizer': 'adam',
+             'batch_size': 32,
+             'dropout1': dpw[4],
+             'dropout2': dpw[6],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 48,
+             'two_LSTM': 1},
+        7:
+            {'optimizer': 'adam',
+             'batch_size': 32,
+             'dropout1': dpw[2],
+             'dropout2': dpw[2],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 48,
+             'two_LSTM': 1},
+        8:
+            {'optimizer': 'adam',
+             'batch_size': 32,
+             'dropout1': dpw[3],
+             'dropout2': dpw[2],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 48,
+             'two_LSTM': 0},
+        9:
+            {'optimizer': 'adam',
+             'batch_size': 32,
+             'dropout1': dpw[1],
+             'dropout2': dpw[3],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 48,
+             'two_LSTM': 1},
+        10:
+            {'optimizer': 'adam',
+             'batch_size': 32,
+             'dropout1': dpw[0],
+             'dropout2': dpw[8],
+             'use_embeddings': True,
+             'embeddings_trainable': False,
+             'lstm_hs': 48,
+             'two_LSTM': 0}
+    }
 
     accs, kps, wts, acts, preds = train_cv(args, params, pairs)
     cv_kappa = metrics.mean_quadratic_weighted_kappa(kps)
@@ -142,7 +227,8 @@ def train_cv(args, params, pairs):
     kps = [] # for ASAP
     wts = []
     acts = np.zeros(0) 
-    preds = np.zeros(0) 
+    preds = np.zeros(0)
+    fold = 1
     for(train, test) in pairs:
         print(train + '=>' + test + '...')
         x_train, y_train, x_test, y_test, word_index, nb_classes, train_len, test_len = read_input_csv(train,
@@ -165,7 +251,7 @@ def train_cv(args, params, pairs):
         args.nb_words = nb_words
         args.len_labels_index = nb_classes
 
-        y_pred, y_act = run_a_model(args, params, embedding_matrix, x_train, y_train, x_test, y_test,
+        y_pred, y_act = run_a_model(args, params[fold], embedding_matrix, x_train, y_train, x_test, y_test,
                                     train_len, test_len)
 
         acc = accuracy(y_pred, y_act)
@@ -177,6 +263,7 @@ def train_cv(args, params, pairs):
 
         acts = np.concatenate([acts, y_act])
         preds = np.concatenate([preds, y_pred])
+        fold = fold + 1
 
     return (accs, kps, wts, acts, preds)
 
