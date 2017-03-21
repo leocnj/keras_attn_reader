@@ -33,7 +33,7 @@ def asap(args):
              'dropout1': dpw[0],
              'dropout2': dpw[3],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 64,
              'two_LSTM': 1},
         2:
@@ -42,7 +42,7 @@ def asap(args):
              'dropout1': dpw[3],
              'dropout2': dpw[6],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 32,
              'two_LSTM': 1},
         3:
@@ -51,7 +51,7 @@ def asap(args):
              'dropout1': dpw[0],
              'dropout2': dpw[8],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 48,
              'two_LSTM': 0},
         4:
@@ -60,7 +60,7 @@ def asap(args):
              'dropout1': dpw[6],
              'dropout2': dpw[8],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 64,
              'two_LSTM': 1},
         5:
@@ -69,7 +69,7 @@ def asap(args):
              'dropout1': dpw[4],
              'dropout2': dpw[3],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 48,
              'two_LSTM': 1},
         6:
@@ -78,7 +78,7 @@ def asap(args):
              'dropout1': dpw[4],
              'dropout2': dpw[6],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 48,
              'two_LSTM': 1},
         7:
@@ -87,7 +87,7 @@ def asap(args):
              'dropout1': dpw[2],
              'dropout2': dpw[2],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 48,
              'two_LSTM': 1},
         8:
@@ -96,7 +96,7 @@ def asap(args):
              'dropout1': dpw[3],
              'dropout2': dpw[2],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 48,
              'two_LSTM': 0},
         9:
@@ -105,7 +105,7 @@ def asap(args):
              'dropout1': dpw[1],
              'dropout2': dpw[3],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 48,
              'two_LSTM': 1},
         10:
@@ -114,7 +114,7 @@ def asap(args):
              'dropout1': dpw[0],
              'dropout2': dpw[8],
              'use_embeddings': True,
-             'embeddings_trainable': False,
+             'embeddings_trainable': True,
              'lstm_hs': 48,
              'two_LSTM': 0}
     }

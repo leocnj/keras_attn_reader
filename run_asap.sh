@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-KERAS_BACKEND=theano THEANO_FLAGS=device=gpu0 python app/runexp_cv.py \
+KERAS_BACKEND=theano THEANO_FLAGS=device=${2} python app/runexp_cv.py \
  --dataset=asap \
  --exp_name=${1} \
  --data_dir=data/asap/ \
