@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# gpu item_id batch_size (16, 32, 48)
-KERAS_BACKEND=theano THEANO_FLAGS=device=${1} python app/tweak_params.py \
+# exp_name item_id batch_size (16,32)
+KERAS_BACKEND=theano THEANO_FLAGS=device=${4} python app/tweak_params.py \
  --dataset=asap \
- --exp_name=lstm \
+ --exp_name=${1} \
  --data_dir=data/asap/ \
  --embedding_file_path=embd/glove.6B.300d.txt \
  --embedding_dim=300 \

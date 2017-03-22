@@ -142,6 +142,9 @@ def _kim_cnn_model(params, args, nb_classes, embedding_matrix):
     embeddings_trainable = params['embeddings_trainable']
 
     input = Input(shape=(args.max_sequence_len,), dtype='int32', name="input")
+    aux = Input(shape=(1,), dtype='float32', name="aux")
+    len_feat = Dense(1, activation='softmax')(aux)
+
     if (use_embeddings):
         embedding_layer = Embedding(args.nb_words + 1,
                                     args.embedding_dim,
@@ -171,10 +174,11 @@ def _kim_cnn_model(params, args, nb_classes, embedding_matrix):
     else:
         conv_out = conv_list[0]
 
-    dp_out = Dropout(params['dropout2'])(conv_out)
-    result = Dense(nb_classes, activation='softmax')(dp_out)
+    x = Dropout(params['dropout2'])(conv_out)
+    x = merge([x, len_feat], mode='concat')
+    result = Dense(nb_classes, activation='softmax')(x)
 
-    model = Model(input=input, output=result)
+    model = Model(input=[input, aux], output=result)
     model.compile(loss='categorical_crossentropy',
                   optimizer=params['optimizer'],
                   metrics=['acc'])
