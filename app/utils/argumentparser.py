@@ -23,6 +23,8 @@ def ArgumentParser():
                         help='Fraction of data to be used for validation')
     parser.add_argument('--embedding_dim', type=int, default=100,
                         help='Dimension of the embedding space to be used')
+    parser.add_argument('--embedding_trainable', type=int, default=0,
+                        help='Whether to re-train word embedding')
     parser.add_argument('--model_name', type=str, default='cnn-rand',
                         help='Name of the model variant, from the CNN Sentence '
                              'Classifier paper. Possible values are cnn-rand, cnn-static'

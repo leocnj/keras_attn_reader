@@ -124,18 +124,18 @@ if __name__ == '__main__':
         trials2csv(trials, 'ted_hp.csv')
     elif(args.dataset == 'asap'):
         x_train, y_train, x_test, y_test, embedding_matrix, nb_classes, train_len, test_len = pun(args)
-        space = {'optimizer': hp.choice('optimizer', ['adadelta', 'rmsprop', 'adam']),
+        space = {'optimizer': 'adam',
                  'batch_size': args.batch_size,
-                 'two_LSTM': hp.choice('two_LSTM', [0, 1]),
-                 'dropout1': hp.choice('dropout1', [0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75]),
-                 'dropout2': hp.choice('dropout2', [0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75]),
+                 'two_LSTM': 0, #  based on data size, using one layer BDLSTM
+                 'dropout1': 0.2,
+                 'dropout2': hp.uniform('dropout2', 0.25, 0.75),
                  'use_embeddings': True,
                  'embeddings_trainable': False,
-                 'lstm_hs': hp.choice('lstm_hs', [32, 48, 64])}
+                 'lstm_hs': hp.choice('lstm_hs', [24, 32, 48, 60])}
         trials = Trials()
         best = fmin(model, space, algo=tpe.suggest, max_evals=args.tweak_max, trials=trials)
         print(best)
-        hp_out = 'asap_' + str(args.tweak_id) + '.csv'
+        hp_out = 'log/asap_' + 'item-' + str(args.tweak_id) + 'bsize-' + str(args.batch_size) + '.csv'
         trials2csv(trials, hp_out)
     else:
         print('wrong dataset')
