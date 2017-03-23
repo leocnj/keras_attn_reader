@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# exp_name GPU ET_yes batch_size
+#
 KERAS_BACKEND=theano THEANO_FLAGS=device=${2} python app/runexp_cv.py \
  --dataset=asap \
  --exp_name=${1} \
