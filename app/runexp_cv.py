@@ -2,11 +2,11 @@ from __future__ import print_function
 
 from keras.callbacks import EarlyStopping
 from model.model_tweak import model_selector
-# from keras.utils.np_utils import accuracy     removed after keras2
 from reader.filereader import read_glove_vectors
 from reader.csvreader import read_input_csv
 
 from utils import argumentparser
+from utils.timeit import timeit
 import ml_metrics as metrics
 import numpy as np
 import pandas as pd
@@ -14,7 +14,8 @@ import pandas as pd
 np.random.seed(42)
 
 def accuracy(y_pred, y_act):
-    return float(len(y_pred == y_act))/float(len(y_act))
+    return 1 - metrics.ce(y_act, y_pred)
+
 
 def wt_accuracy(accs, wts):
     return np.average(accs, weights=wts)
@@ -296,7 +297,7 @@ def run_a_model(args, params, embedding_matrix, x_train, y_train, x_test, y_test
     y_pred = y_proba.argmax(axis=-1)
     return y_pred, y_act
 
-
+@timeit
 def train_cv(args, params, pairs):
 
     print('Reading word vectors.')
