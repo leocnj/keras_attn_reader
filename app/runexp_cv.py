@@ -2,7 +2,7 @@ from __future__ import print_function
 
 from keras.callbacks import EarlyStopping
 from model.model_tweak import model_selector
-from keras.utils.np_utils import probas_to_classes, accuracy
+# from keras.utils.np_utils import accuracy     removed after keras2
 from reader.filereader import read_glove_vectors
 from reader.csvreader import read_input_csv
 
@@ -12,6 +12,9 @@ import numpy as np
 import pandas as pd
 
 np.random.seed(42)
+
+def accuracy(y_pred, y_act):
+    return float(len(y_pred == y_act))/float(len(y_act))
 
 def wt_accuracy(accs, wts):
     return np.average(accs, weights=wts)
@@ -286,9 +289,11 @@ def run_a_model(args, params, embedding_matrix, x_train, y_train, x_test, y_test
               callbacks=callbacks_list)
     y_proba = earlystop.model.predict([x_test, test_len], batch_size=args.batch_size)
     # http://bit.ly/2hFvAjS
-    y_act = probas_to_classes(y_test)
-    y_pred = probas_to_classes(y_proba)
-
+    # y_act = probas_to_classes(y_test)
+    # y_pred = probas_to_classes(y_proba)
+    # http://bit.ly/2sYN7xN
+    y_act = y_test.argmax(axis=-1)
+    y_pred = y_proba.argmax(axis=-1)
     return y_pred, y_act
 
 

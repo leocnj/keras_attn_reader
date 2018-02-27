@@ -4,8 +4,10 @@ from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.layers import Dense, Flatten, Dropout,  LSTM, Bidirectional
 from keras.layers import merge
 from keras.models import Model
-from keras.engine import Input, Merge
-from att_layer import AttLayer
+from keras.engine import Input
+from keras.layers import Merge
+from .att_layer import AttLayer
+# from .attention_keras import Position_Embedding, Attention
 import sys
 
 def model_selector(params, args, nb_classes, embedding_matrix):

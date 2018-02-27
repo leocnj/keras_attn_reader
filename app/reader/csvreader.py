@@ -39,7 +39,8 @@ def read_input_csv(train_csv, test_csv, nb_words, maxlen):
     n_ts = len(test_X)
     print('Instances: train {} vs. test {}'.format(n_ta, n_ts))
 
-    textraw = [line.encode('utf-8') for line in train_X+test_X]  # keras needs str
+    # textraw = [line.encode('utf-8') for line in train_X+test_X]  # keras needs str
+    textraw = [str(line) for line in train_X+test_X]  # python3
     token = Tokenizer(nb_words=nb_words)
     token.fit_on_texts(textraw)
 

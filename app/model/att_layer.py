@@ -1,11 +1,11 @@
 # Attention GRU network
 from keras import backend as K
 from keras.engine.topology import Layer
-from keras import initializations
+from keras import initializers
 
 class AttLayer(Layer):
     def __init__(self, **kwargs):
-        self.init = initializations.get('normal')
+        self.init = initializers.get('normal')
         super(AttLayer, self).__init__(**kwargs)
 
     def build(self, input_shape):
