@@ -10,6 +10,28 @@ from .att_layer import AttLayer
 from .attention_keras import Position_Embedding, Attention
 import sys
 
+# see http://bit.ly/2GPBw6e
+## extra imports to set GPU options
+import tensorflow as tf
+from keras import backend as k
+
+def limit_GPU_():
+    ###################################
+    # TensorFlow wizardry
+    config = tf.ConfigProto()
+
+    # Don't pre-allocate memory; allocate as-needed
+    config.gpu_options.allow_growth = True
+
+    # Only allow a total of half the GPU memory to be allocated
+    config.gpu_options.per_process_gpu_memory_fraction = 0.5
+
+    # Create a session with the above options specified.
+    k.tensorflow_backend.set_session(tf.Session(config=config))
+
+
+###################################
+
 def model_selector(params, args, nb_classes, embedding_matrix):
     """
 
@@ -20,6 +42,7 @@ def model_selector(params, args, nb_classes, embedding_matrix):
     :return:
     Method to select the model to be used for classification
     """
+    limit_GPU_()
     if (args.exp_name.lower() == 'cnn'):
         return _kim_cnn_model(params, args, nb_classes, embedding_matrix)
     elif (args.exp_name.lower() == 'lstm'):
