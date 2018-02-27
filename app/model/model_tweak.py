@@ -5,9 +5,9 @@ from keras.layers import Dense, Flatten, Dropout,  LSTM, Bidirectional
 from keras.layers import merge
 from keras.models import Model
 from keras.engine import Input
-from keras.layers import Merge
+from keras.layers import Merge, GlobalAveragePooling1D
 from .att_layer import AttLayer
-# from .attention_keras import Position_Embedding, Attention
+from .attention_keras import Position_Embedding, Attention
 import sys
 
 def model_selector(params, args, nb_classes, embedding_matrix):
@@ -26,9 +26,58 @@ def model_selector(params, args, nb_classes, embedding_matrix):
         return _lstm_model(params, args, nb_classes, embedding_matrix)
     elif (args.exp_name.lower() == 'attn'):
         return _attn_model(params, args, nb_classes, embedding_matrix)
+    elif (args.exp_name.lower() == 'mh_attn'):
+        return _mh_attn_model(params, args, nb_classes, embedding_matrix)
     else:
         print('wrong exp_name')
         sys.exit()
+
+
+def _mh_attn_model(params, args, nb_classes, embedding_matrix):
+    """
+    multi-head (mh) attention-based
+    :param args:
+    :param embedding_matrix:
+    :return:
+    """
+
+    lstm_hs = params['lstm_hs']
+    use_embeddings = params['use_embeddings']
+    embeddings_trainable = params['embeddings_trainable']
+
+    input = Input(shape=(args.max_sequence_len,), dtype='int32', name="input")
+    aux = Input(shape=(1,), dtype='float32', name="aux")
+    len_feat = Dense(1, activation='softmax')(aux)
+
+    if (use_embeddings):
+        embedding_layer = Embedding(args.nb_words + 1,
+                                    args.embedding_dim,
+                                    weights=[embedding_matrix],
+                                    input_length=args.max_sequence_len,
+                                    trainable=embeddings_trainable)(input)
+    else:
+        embedding_layer = Embedding(args.nb_words + 1,
+                                    args.embedding_dim,
+                                    weights=None,
+                                    input_length=args.max_sequence_len,
+                                    trainable=embeddings_trainable)(input)
+
+    x = Dropout(params['dropout1'])(embedding_layer)
+    x = Attention(8, 8)([x, x, x])
+    x = GlobalAveragePooling1D()(x)
+    # x = AttLayer()(x)
+    x = Dropout(params['dropout2'])(x)
+
+    x = merge([x, len_feat], mode='concat')
+
+    result = Dense(nb_classes, activation='softmax')(x)
+    model = Model(input=[input, aux], output=result)
+    model.compile(loss='categorical_crossentropy',
+                  optimizer=params['optimizer'],
+                  metrics=['acc'])
+    print(model.summary())
+    return model
+
 
 def _attn_model(params, args, nb_classes, embedding_matrix):
     """
