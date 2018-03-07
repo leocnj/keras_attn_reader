@@ -6,7 +6,7 @@ from reader.filereader import read_glove_vectors
 from reader.csvreader import read_input_csv
 
 from utils import argumentparser
-from utils.timeit import timeit
+from utils.time_comp import timeit
 import ml_metrics as metrics
 import numpy as np
 import pandas as pd
